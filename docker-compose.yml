@@ -1,0 +1,37 @@
+version: '3.8'
+services:      
+  dbct:
+    container_name: dbct
+    image: mysql
+    restart: always
+    environment:
+        MYSQL_ROOT_PASSWORD: root
+        MYSQL_DATABASE: testedb
+        MYSQL_USER: root
+        MYSQL_PASSWORD: Senha123
+    ports:
+        - "9906:3306"
+    volumes:
+        - ./apache-A/dbct:/docker-entrypoint-initdb.d
+
+  php-apache-environment:
+    container_name: php-apache
+    build:
+        context: ./opt/apache-A
+        dockerfile: /opt/php/Dockerfile
+    depends_on:
+        - dbct
+    volumes:
+      - ./apache-A/src:/var/www/html/
+    ports:
+      - 8000:80
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+        - '8080:80'
+    restart: always
+    environment:
+        PMA_HOST: dbct
+    depends_on:
+        - dbct
